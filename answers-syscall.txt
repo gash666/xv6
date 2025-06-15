@@ -1,0 +1,12 @@
+1. The function that called syscall is usertrap
+2. The value of p->trapframe->a7 is 0x7.
+this value represents the syscall that is being called (7 means that the all was for sys_fstat)
+3. I wrote
+p /x $mstatus
+and looked at bits 11-12 and saw that their value is 00 meaning it was called from user mode.
+4. The instruction that the kernel is panicing at is
+lw	a3,0(zero)
+The register that corresponds to the variable num is a3.
+5. The address is not mapped and that is the reason for the error.
+The value of scause is 0x000000000000000d which means that the error was load page fault which confirms this reasoning.
+6. The name of the binary that was running when the kernel paniced is "initcode\000\000\000\000\000\000\000" and its pid is 1.

@@ -43,6 +43,16 @@ proc_mapstacks(pagetable_t kpgtbl)
   }
 }
 
+// Get the number of running processes
+uint64 get_number_processes()
+{
+  uint64 counter = 0;
+  for (int i = 0; i < NPROC; i++)
+    if (proc[i].state != UNUSED)
+      counter++;
+  return counter;
+}
+
 // initialize the proc table.
 void
 procinit(void)
@@ -287,6 +297,9 @@ fork(void)
   if((np = allocproc()) == 0){
     return -1;
   }
+
+  // Preserve the mask
+  np->mask = p->mask;
 
   // Copy user memory from parent to child.
   if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){

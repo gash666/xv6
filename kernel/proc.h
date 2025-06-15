@@ -92,6 +92,8 @@ struct proc {
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
 
+  int mask;                     // Mask for trace command
+
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
 
@@ -105,3 +107,5 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 };
+
+uint64 get_number_processes();
