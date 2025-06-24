@@ -1,0 +1,8 @@
+question 1:
+We can modify the read syscall to not use copyout and instead to write to the shared page which would be faster.
+question 2:
+Page 0 contains data in the "text" section - the code for exe.c.
+Page 2 is a "guard page". Which helps to make sure that the stack doesn't overwrite other memory.
+We can know this because the PTE for this page has 0 on the second from right digit which shows us that the PTE_U is 0.
+The PTE for page 1 starts with 7 which mean that it can be written and read (7=111b with the second bit allowing reading and the third allowing writing).
+The third to last PTE contains the page we mapped in the previous task for spesedup. We can know this because the PTE for this page starts with 13.

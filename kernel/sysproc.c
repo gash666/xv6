@@ -71,10 +71,54 @@ sys_sleep(void)
 
 
 #ifdef LAB_PGTBL
+int check_PTE_A(pagetable_t pagetable, uint64 va)
+{
+  for (int level = 2; level > 0; level--)
+  {
+    pte_t* pte = &pagetable[PX(level, va)];
+    if (*pte & PTE_V)
+      pagetable = (pagetable_t)PTE2PA(*pte);
+    else
+      return 0;
+  }
+
+  if (pagetable[PX(0, va)] & PTE_A)
+  {
+    pagetable[PX(0, va)] -= PTE_A;
+    return 1;
+  }
+  return 0;
+}
+
 int
 sys_pgaccess(void)
 {
-  // lab pgtbl: your code here.
+  uint64 addr;
+  int number_pages;
+  uint64 buffer;
+
+  argaddr(0, &addr);
+  argint(1, &number_pages);
+  argaddr(2, &buffer);
+
+  if (number_pages > PGSIZE)
+  {
+    return -1;
+  }
+
+  uint64 answer_size = (number_pages + 7) / 8;
+
+  struct proc* p = myproc();
+  char* temp_answer = (char*)kalloc();
+  for (int i = 0; i < number_pages / 8; i++)
+    temp_answer[i] = 0;
+  
+  for (int i = 0; i < number_pages; i++)
+    if (check_PTE_A(p->pagetable, addr + i * PGSIZE))
+      temp_answer[i / 8] |= (1 << (i % 8));
+
+  copyout(p->pagetable, buffer, temp_answer, answer_size);
+  kfree(temp_answer);
   return 0;
 }
 #endif
